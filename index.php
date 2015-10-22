@@ -69,7 +69,7 @@ if(is_array($_FILES) && isset($_FILES['userImage'])) {
     </style>
 </head>
 <body>
-    <h1>Smart Image Tool</h1>
+    <h1>Smart Image Tool <sub>(<a target="_blank" href="https://github.com/xl714/SmartImageTool">code source on github</a>)</sub></h1>
     <h4>© Xavier Langlois - Octobre 2015</h4>
     <p>FR: Outil détectant automatiquement la zone la plus intéressante dans une image pour la cropper. Elle utilise pour cela la variation de couleur entre chaque pixel.</p>
     <p>EN: This tool automatically find the most interesting zone in a picture in order to crop it. It uses the color variations between each pixel.</p>
