@@ -3,4 +3,6 @@ FR: Classe php utilisant PHP-GD afin de détecter automatiquement la zone la plu
 EN: This php class uses PHP-GD to automatically find the most interesting zone in a picture in order to crop it. It uses the color variations between each pixel.</p>
 
 ## Demo :
-http://monpaname.com/xl714/work/SmartImageTool/
+http://monpaname.com/xl714/work/SmartImageTool
+
+
