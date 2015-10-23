@@ -72,8 +72,8 @@ class SmartImageTool
             }
         }elseif(file_exists($source)){
             $this->originalImagePath = $source;
-            $extension = strtolower($this->originalImageFileInfos['extension']);
             $this->originalImageFileInfos = pathinfo($this->originalImagePath); //d($fInfos); exit();
+            $extension = strtolower($this->originalImageFileInfos['extension']);
             if( !in_array($extension, array('jpeg','jpg', 'png')) ){
                 $this->errors[] = 'Error: Image must be a jpeg or png to use this class.';
                 return $this;
@@ -91,16 +91,19 @@ class SmartImageTool
     }
 
     public function getFinalImageSrcAsBlob(){
-
         if(empty($this->finalImage)){
             $this->buildFinalImage();
         }
-
         if(!empty($this->errors)){ return false; }
+        return self::getImageSrcAsBlob($this->finalImage);
+    }
 
-        //ob_clean();
+    public function getOriginalImageSrcAsBlob(){
+        return self::getImageSrcAsBlob($this->originalImage);
+    }
+    public static function getImageSrcAsBlob($gdImage){
         ob_start();
-        imagepng($this->finalImage);
+        imagepng($gdImage);
         $imageBlob = ob_get_contents(); // read from buffer
         ob_end_clean(); // delete buffer
         return 'data:image/png;base64,'.base64_encode($imageBlob).'';
@@ -337,24 +340,24 @@ class SmartImageTool
         return array('x' => $totalX/$totalMass, 'y' => $totalY/$totalMass);
     }
 
-    public function printVariationsMatrix(){
+    public function getVariationsMatrix(){
         $matrix = $this->getTmpImageVariationsMatrix();
-        self::printMatrix($matrix);
-        return $this;
+        return self::matrixToString($matrix);
     }
 
-    public static function printMatrix($matrix){
-        if(empty($matrix)) return;
-        echo '<pre style="font-size:9px;line-height:15px;">';
+    public static function matrixToString($matrix){
+        if(empty($matrix)) return '';
+        $str = '<pre style="font-size:9px;line-height:15px;">';
         foreach ($matrix as $y => $row) {
             if(empty($row)) break;
-            echo '<div>';
-            foreach ($row as $x => $value) {
-                echo '<span>'.sprintf("%4s", $value).'</span>';
+            $str .= '<div>';
+            foreach($row as $x => $value) {
+                $str .= '<span>'.sprintf("%4s", $value).'</span>';
             }
-            echo '</div>';
+            $str .= '</div>';
         }
-        echo '</pre>';
+        $str .= '</pre>';
+        return $str;
     }
 
     public function cleanExit(){
