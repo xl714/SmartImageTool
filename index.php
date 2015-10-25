@@ -20,7 +20,6 @@ if(
 }
 
 if($source){
-    //d($_POST);
 
     $finalImageRatio = 1;
     if (!empty($_POST['finalImageRatioWidth']) && !empty($_POST['finalImageRatioHeight'])) {
@@ -33,18 +32,24 @@ if($source){
     }
 
     $img = SmartImageTool::instance( $source )
-        ->setFinalImageRatio($finalImageRatio)
         ->setTmpImageWidth($tmpImageWidth)
+        ->setFinalImageRatio($finalImageRatio)
         ->buildFinalImage();
+
+    if(!empty($_POST['setFinalImageRatio2']) && $_POST['setFinalImageRatio2'] == 'true'){
+
+        $finalImageRatio2 = $_POST['finalImageRatioWidth2'] / $_POST['finalImageRatioHeight2'];
+        $img = $img->setFinalImageRatio( $finalImageRatio2 )->buildFinalImage();
+    }
 
     if(empty($img->errors)){
 
-        if (!empty($_POST['getOriginalImageSrcAsBlob']) && $_POST['getOriginalImageSrcAsBlob'] == 'true') {
+        /*if (!empty($_POST['getOriginalImageSrcAsBlob']) && $_POST['getOriginalImageSrcAsBlob'] == 'true') {
             echo '<img src="'.$img->getOriginalImageSrcAsBlob().'" width="300" hspace="15" border="1"/>';
-        }
+        }*/
 
         echo '<h3>&nbsp;Result&#8680;&nbsp;</h3>
-            <img src="'.$img->getFinalImageSrcAsBlob().'" width="150" hspace="15" border="1">';
+            <img src="'.$img->getFinalImageSrcAsBlob().'" width="300" hspace="15" border="1">';
 
         if (!empty($_POST['getVariationsMatrix']) && $_POST['getVariationsMatrix'] == 'true') {
             echo '<div style="clear:both;padding: 15px 0 0 0;">Variations matrix of the uploaded picture used to find the interesting zone:</div>';
@@ -80,20 +85,25 @@ if($source){
                     <option>10</option><option>20</option><option>30</option><option selected="selected">40</option><option>50</option><option>75</option><option>100</option><option>150</option><option>200</option>
                 </select><span class="sh_symbol">)</span>
             <span class="sh_symbol">-></span>setFinalImageRatio<span class="sh_symbol">(</span><select id="finalImageRatioWidth">
-                    <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option>
+                    <option>1</option><option selected="selected">2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option>
                 </select> / <select id="finalImageRatioHeight">
-                    <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option>
+                    <option>1</option><option>2</option><option selected="selected">3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option>
                 </select><span class="sh_symbol">)</span>
+        <input type="checkbox" id="setFinalImageRatio2" style="margin:0 5px 0 3px;padding:0 3px 0 3px;" /> <span class="sh_symbol">-></span>setFinalImageRatio<span class="sh_symbol">(</span><select id="finalImageRatioWidth2">
+                    <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option>
+                </select> / <select id="finalImageRatioHeight2">
+                    <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option>
+                </select><span class="sh_symbol">)</span><span class="sh_comment">// = ZOOM (working on this one)</span>
             <span class="sh_symbol">-></span>buildFinalImage<span class="sh_symbol">();</span>
-<input type="checkbox" id="getOriginalImageSrcAsBlob" checked="checked" /> <span class="sh_keyword">echo</span> <span class="sh_string">'&lt;img src="'</span>.<span class="sh_variable">$img</span><span class="sh_symbol">-></span>getOriginalImageSrcAsBlob<span class="sh_symbol">()</span>.<span class="sh_string">'" &gt;'</span>;
 <input type="checkbox" disabled="disabled" checked="checked" /> <span class="sh_keyword">echo</span> <span class="sh_string">'&lt;img src="'</span>.<span class="sh_variable">$img</span><span class="sh_symbol">-></span>getFinalImageSrcAsBlob<span class="sh_symbol">()</span>.<span class="sh_string">'" &gt;'</span>;
 <input type="checkbox" id="getVariationsMatrix" checked="checked" checked="checked" /> <span class="sh_keyword">echo</span> <span class="sh_variable">$img</span><span class="sh_symbol">-></span>getVariationsMatrix<span class="sh_symbol">();</span>
 <span class="sh_symbol">?&gt;</span>
-</pre>
+</pre><!--input type="checkbox" id="getOriginalImageSrcAsBlob" checked="checked" /> <span class="sh_keyword">echo</span> <span class="sh_string">'&lt;img src="'</span>.<span class="sh_variable">$img</span><span class="sh_symbol">-></span>getOriginalImageSrcAsBlob<span class="sh_symbol">()</span>.<span class="sh_string">'" &gt;'</span>;-->
+
 
     <div id="images-test">
         <div>Click an image</div>
-        <img src="images-test/miranda-kerr.jpg">
+        <!--img src="images-test/miranda-kerr.jpg"-->
         <img src="images-test/cat.jpg">
         <img src="images-test/fox.jpg">
     </div>
@@ -101,7 +111,7 @@ if($source){
     <div id="drop-area">
         <div class="drop-text">
             Or drag & drop an image here<br/>
-            It will be (hopefully) square cropped at the right place.
+            It will be cropped with the input ratio and (hopefully) at the right place.
         </div>
     </div>
     <div class="clear"></div>
@@ -134,6 +144,9 @@ if($source){
         formData.append('userImage', userImage);
         formData.append('finalImageRatioWidth', $("#finalImageRatioWidth").val());
         formData.append('finalImageRatioHeight', $("#finalImageRatioHeight").val());
+        formData.append('setFinalImageRatio2', $('#setFinalImageRatio2').prop('checked'));
+        formData.append('finalImageRatioWidth2', $("#finalImageRatioWidth2").val());
+        formData.append('finalImageRatioHeight2', $("#finalImageRatioHeight2").val());
         formData.append('tmpImageWidth', $("#tmpImageWidth").val());
         formData.append('getOriginalImageSrcAsBlob', $('#getOriginalImageSrcAsBlob').prop('checked'));
         formData.append('getVariationsMatrix', $('#getVariationsMatrix').prop('checked'));

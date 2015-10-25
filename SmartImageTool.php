@@ -60,7 +60,9 @@ class SmartImageTool
     }
 
     public function __construct($source){
-        //d($source); die();
+        
+        $extension = false;
+
         if(is_array($source) && !empty($source['tmp_name'])  && !empty($source['type'])){
             $this->originalImagePath = $source['tmp_name'];
             $extensionByType = array('image/jpeg'=>'jpg', 'image/png'=> 'png');
@@ -70,7 +72,11 @@ class SmartImageTool
                 $this->errors[] = 'Error: Http posted image must be a jpeg or png to use this class.';
                 return $this;
             }
-        }elseif(file_exists($source)){
+        }
+        elseif(is_resource($source) && get_resource_type($source) == 'gd'){
+            $this->originalImage = $source;
+        }
+        elseif(file_exists($source)){
             $this->originalImagePath = $source;
             $this->originalImageFileInfos = pathinfo($this->originalImagePath); //d($fInfos); exit();
             $extension = strtolower($this->originalImageFileInfos['extension']);
@@ -82,10 +88,10 @@ class SmartImageTool
             $this->errors[] = 'Error: Invalide source. Source must be either an image filepath or an http posted image file.';
             return $this;
         }
-        $this->originalImage = ($extension == 'png') ? imagecreatefrompng($this->originalImagePath) : ImageCreateFromJpeg($this->originalImagePath);
-        $originalImageSize = getimagesize($this->originalImagePath); //d($this->originalImageSize, 'originalImageSize'); //exit();
-        $this->originalImageWidth = $originalImageSize[0];
-        $this->originalImageHeight = $originalImageSize[1];
+        if($extension) $this->originalImage = ($extension == 'png') ? imagecreatefrompng($this->originalImagePath) : ImageCreateFromJpeg($this->originalImagePath);
+        //$originalImageSize = getimagesize($this->originalImagePath); //d($this->originalImageSize, 'originalImageSize'); //exit();
+        $this->originalImageWidth = imagesx($this->originalImage); //$originalImageSize[0];
+        $this->originalImageHeight = imagesy($this->originalImage); //$originalImageSize[1];
         $this->originalImageRatio = $this->originalImageWidth / $this->originalImageHeight; //d($this->originalImageRatio, 'originalImageRatio');
         return $this;
     }
@@ -372,6 +378,9 @@ class SmartImageTool
         return $this->finalImageRatio;
     }
     public function setFinalImageRatio($finalImageRatio){
+        if(!empty($this->finalImage)){ // zoom case
+            return self::instance($this->finalImage)->setFinalImageRatio($finalImageRatio);
+        }
         $this->finalImageRatio = $finalImageRatio;
         return $this;
     }

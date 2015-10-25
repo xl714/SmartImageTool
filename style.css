@@ -2,14 +2,14 @@
 #drop-area {
     width: 500px; height: 140px;
     position:absolute;
-    left:50%; margin-left:-250px; margin-top: 60px;
+    left:50%; margin-left:-250px; margin-top: 30px;
     border: 2px dashed gray;
     border-radius: 20px;
     font-family: Arial; text-align: center; 
     position: relative;
     line-height: 40px; font-size: 20px;
     color: gray;
-    padding: 40px 20px 0px 20px;
+    padding: 20px 20px 0px 20px;
 }
 #drop-area.hover { 
     border: 10px dashed #0c0 !important;
@@ -23,7 +23,7 @@ p{
     font-family: Arial;
 }
 .code-conf{
-    width:500px;
+    width:600px;
     float:left;
 }
 #images-test img{
