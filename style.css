@@ -1,0 +1,65 @@
+
+#drop-area {
+    width: 500px; height: 140px;
+    position:absolute;
+    left:50%; margin-left:-250px; margin-top: 60px;
+    border: 2px dashed gray;
+    border-radius: 20px;
+    font-family: Arial; text-align: center; 
+    position: relative;
+    line-height: 40px; font-size: 20px;
+    color: gray;
+    padding: 40px 20px 0px 20px;
+}
+#drop-area.hover { 
+    border: 10px dashed #0c0 !important;
+}
+#result > *{
+    float:left;
+}
+h1, h4{text-align: center;}
+p{
+    font-size: 12px;
+    font-family: Arial;
+}
+.code-conf{
+    width:500px;
+    float:left;
+}
+#images-test img{
+    height:130px;
+    margin-left: 10px;
+    cursor: pointer;
+}
+#images-test div{
+    font-size: 20px;
+    font-family: Arial;
+    color: gray;
+}
+.clear{ clear: both; width: 1px; height: 1px; padding: 0px; margin: 0; overflow: hidden; line-height: 1px;}
+
+.code-conf select{
+    border:0px solid transparent;
+}
+.code-conf .sh_symbol {
+    color: #ff0080;
+    font-weight: bold;
+}
+.code-conf .sh_preproc {
+    color: #0000ff;
+}
+.sh_string {
+    color: #A31515;
+}
+.sh_keyword {
+    color: #00008B;
+    font-weight: bold;
+}
+.sh_variable {
+    color: #0000ff;
+    font-weight: bold;
+}
+.sh_comment {
+    color: #008000;
+    font-style: italic;
+}

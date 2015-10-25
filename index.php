@@ -58,81 +58,41 @@ if($source){
 }
 ?>
 <html>
-<title>PHP-GD Smart Image Tool</title>
+<title>PHP-GD Smart Image Tool - Crop automatique "intelligent"</title>
 <meta name="description" content="Classe détectant automatiquement la zone la plus intéressante dans une image par exemple pour la cropper. This class automatically find the most interesting zone in a picture in order to crop it.">
 <meta name="author" content="Xavier Langlois aka XL714">
 <meta charset="UTF-8">
 <head>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
-    <style>
-        #drop-area {
-            width: 500px; height: 140px;
-            position:absolute;
-            left:50%; margin-left:-250px; margin-top: 60px;
-            border: 2px dashed gray;
-            border-radius: 20px;
-            font-family: Arial; text-align: center; 
-            position: relative;
-            line-height: 40px; font-size: 20px;
-            color: gray;
-            padding: 40px 20px 0px 20px;
-        }
-        #drop-area.hover { 
-            border: 10px dashed #0c0 !important;
-        }
-        #result > *{
-            float:left;
-        }
-        h1, h4{text-align: center;}
-        p{
-            font-size: 12px;
-            font-family: Arial;
-        }
-        .code-conf{
-            width:500px;
-            float:left;
-        }
-        #images-test img{
-            height:130px;
-            margin-left: 10px;
-            cursor: pointer;
-        }
-        #images-test div{
-            font-size: 20px;
-            font-family: Arial;
-            color: gray;
-        }
-        .clear{ clear: both; width: 1px; height: 1px; padding: 0px; margin: 0; overflow: hidden; line-height: 1px;}
-    </style>
+    <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
-    <h1>PHP-GD Smart Image Tool</h1>
+    <h1>PHP-GD Smart Image Tool - Crop automatique "intelligent"</h1>
     <h4>Source code on github : <a target="_blank" href="https://github.com/xl714/SmartImageTool">https://github.com/xl714/SmartImageTool</a> © Xavier Langlois - Octobre 2015</h4>
     <p>FR: Classe php utilisant PHP-GD afin de détecter automatiquement la zone la plus intéressante dans une image pour la cropper. Elle utilise pour cela la variation de couleur entre chaque pixel.</p>
     <p>EN: This php class uses PHP-GD to automatically find the most interesting zone in a picture in order to crop it. It uses the color variations between each pixel.</p>
 
-<pre class="code-conf">&lt;?php
-
-    include('SmartImageTool.php');
-
-    $img = SmartImageTool::instance( <span id="sourceDisplay">"path/to/image.jpg"</span> )
-            ->setFinalImageRatio(<select id="finalImageRatioWidth">
+<pre class="code-conf"><span class="sh_symbol">&lt;?php</span>
+    <span class="sh_comment">// You can change settings here</span>
+    <span class="sh_preproc">include</span><span class="sh_symbol">(</span><span class="sh_string">'SmartImageTool.php'</span><span class="sh_symbol">);</span>
+    <span class="sh_variable">$img</span> <span class="sh_symbol">=</span> SmartImageTool<span class="sh_symbol">::</span>instance<span class="sh_symbol">(</span> <span id="sourceDisplay" class="sh_string">'path/to/image.jpg'</span> <span class="sh_symbol">)</span>
+            <span class="sh_symbol">-></span>setTmpImageWidth<span class="sh_symbol">(</span><select id="tmpImageWidth">
+                    <option>10</option><option>20</option><option>30</option><option selected="selected">40</option><option>50</option><option>75</option><option>100</option><option>150</option><option>200</option>
+                </select><span class="sh_symbol">)</span>
+            <span class="sh_symbol">-></span>setFinalImageRatio<span class="sh_symbol">(</span><select id="finalImageRatioWidth">
                     <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option>
                 </select> / <select id="finalImageRatioHeight">
                     <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option>
-                </select>)
-            ->setTmpImageWidth(<select id="tmpImageWidth">
-                    <option>10</option><option>20</option><option>30</option><option selected="selected">40</option><option>50</option><option>60</option><option>70</option><option>80</option><option>90</option><option>100</option>
-                </select>)
-            ->buildFinalImage();
-
-<input type="checkbox" id="getOriginalImageSrcAsBlob" checked="checked" /> echo '&lt;img src="'.$img->getOriginalImageSrcAsBlob().'" &gt;';
-<input type="checkbox" disabled="disabled" checked="checked" /> echo '&lt;img src="'.$img->getFinalImageSrcAsBlob().'" &gt;';
-<input type="checkbox" id="getVariationsMatrix" checked="checked" checked="checked" /> echo $img->getVariationsMatrix();
+                </select><span class="sh_symbol">)</span>
+            <span class="sh_symbol">-></span>buildFinalImage<span class="sh_symbol">();</span>
+<input type="checkbox" id="getOriginalImageSrcAsBlob" checked="checked" /> <span class="sh_keyword">echo</span> <span class="sh_string">'&lt;img src="'</span>.<span class="sh_variable">$img</span><span class="sh_symbol">-></span>getOriginalImageSrcAsBlob<span class="sh_symbol">()</span>.<span class="sh_string">'" &gt;'</span>;
+<input type="checkbox" disabled="disabled" checked="checked" /> <span class="sh_keyword">echo</span> <span class="sh_string">'&lt;img src="'</span>.<span class="sh_variable">$img</span><span class="sh_symbol">-></span>getFinalImageSrcAsBlob<span class="sh_symbol">()</span>.<span class="sh_string">'" &gt;'</span>;
+<input type="checkbox" id="getVariationsMatrix" checked="checked" checked="checked" /> <span class="sh_keyword">echo</span> <span class="sh_variable">$img</span><span class="sh_symbol">-></span>getVariationsMatrix<span class="sh_symbol">();</span>
+<span class="sh_symbol">?&gt;</span>
 </pre>
 
     <div id="images-test">
-        <div>Click on a image</div>
+        <div>Click an image</div>
         <img src="images-test/miranda-kerr.jpg">
         <img src="images-test/cat.jpg">
         <img src="images-test/fox.jpg">
@@ -153,35 +113,33 @@ if($source){
             e.preventDefault();
             $(this).css('background', '#BBD5B8');
         });
-
         $("#drop-area").on('dragover', function (e){
             e.preventDefault();
         });
-
         $("#images-test img").on('click', function (e){
             e.preventDefault();
-            var formData = new FormData();
-            formData.append('userImage', $(this).attr('src'));
-            upload(formData);
+            upload($(this).attr('src'));
         });
-
         $("#drop-area").on('drop', function (e){
             $(this).css('background', '#D8F9D3');
             e.preventDefault();
-            var images = e.originalEvent.dataTransfer.files;
-            var formData = new FormData();
-            formData.append('userImage', images[0]);
-            upload(formData);
+            images = e.originalEvent.dataTransfer.files;
+            upload(images[0]);
         });
     });
 
-    function upload(formData){
+    function upload(userImage){
 
+        formData = new FormData();
+        formData.append('userImage', userImage);
         formData.append('finalImageRatioWidth', $("#finalImageRatioWidth").val());
         formData.append('finalImageRatioHeight', $("#finalImageRatioHeight").val());
         formData.append('tmpImageWidth', $("#tmpImageWidth").val());
         formData.append('getOriginalImageSrcAsBlob', $('#getOriginalImageSrcAsBlob').prop('checked'));
         formData.append('getVariationsMatrix', $('#getVariationsMatrix').prop('checked'));
+
+        source = (typeof userImage == 'string') ? userImage : userImage.name;
+        $("#sourceDisplay").html("'"+source+"'");
         
         $.ajax({
             url: "index.php",
