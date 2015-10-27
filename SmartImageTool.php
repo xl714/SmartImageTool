@@ -39,6 +39,8 @@ class SmartImageTool
     public $useFilterContrast = true;
     public $filterContrast = -200;
 
+
+
     public $finalImage;
     public $finalImagePath;
     public $finalImageRatio = 1; // e.g portrait = 0.66, landscape  = 1.5, square = 1
@@ -96,7 +98,17 @@ class SmartImageTool
         return $this;
     }
 
+    public function getTmpImageSrcAsBlob(){
+        if(!empty($this->errors)){ return false; }
+        if(empty($this->tmpImage)){
+            $this->buildTmpImage();
+        }
+        if(!empty($this->errors)){ return false; }
+        return self::getImageSrcAsBlob($this->tmpImage);
+    }
+
     public function getFinalImageSrcAsBlob(){
+        if(!empty($this->errors)){ return false; }
         if(empty($this->finalImage)){
             $this->buildFinalImage();
         }
@@ -220,7 +232,7 @@ class SmartImageTool
         if(!empty($this->errors)){ return $this; }
 
         if(!empty($this->heaviestZoneStartX))
-            imagerectangle($this->tmpImage , $this->heaviestZoneStartX , 0 , ($this->heaviestZoneStartX + $this->finalImageWidth ), ($this->tmpImageHeight - 1) , $this->flagColor);
+            imagerectangle($this->tmpImage, $this->heaviestZoneStartX ,0 ,($this->heaviestZoneStartX + $this->finalImageWidth ), ($this->tmpImageHeight - 1), $this->flagColor);
         
         return $this;
     }
@@ -390,6 +402,14 @@ class SmartImageTool
     }
     public function setTmpImageWidth($tmpImageWidth){
         $this->tmpImageWidth = $tmpImageWidth;
+        return $this;
+    }
+
+    public function getFilterContrast(){
+        return $this->filterContrast;
+    }
+    public function setFilterContrast($filterContrast){
+        $this->filterContrast = $filterContrast;
         return $this;
     }
 }

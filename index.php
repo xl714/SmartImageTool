@@ -31,9 +31,16 @@ if($source){
         $tmpImageWidth = (int) $_POST['tmpImageWidth'];
     }
 
+    $filterContrast = -200;
+    if (!empty($_POST['filterContrast'])) {
+        $filterContrast = - (int) $_POST['filterContrast'];
+    }
+
     $img = SmartImageTool::instance( $source )
         ->setTmpImageWidth($tmpImageWidth)
+        ->setFilterContrast($filterContrast)
         ->setFinalImageRatio($finalImageRatio)
+        //->showVariationsHeaviestZoneOnTmpCopy()
         ->buildFinalImage();
 
     if(!empty($_POST['setFinalImageRatio2']) && $_POST['setFinalImageRatio2'] == 'true'){
@@ -47,6 +54,10 @@ if($source){
         /*if (!empty($_POST['getOriginalImageSrcAsBlob']) && $_POST['getOriginalImageSrcAsBlob'] == 'true') {
             echo '<img src="'.$img->getOriginalImageSrcAsBlob().'" width="300" hspace="15" border="1"/>';
         }*/
+
+        if (!empty($_POST['getTmpImageSrcAsBlob']) && $_POST['getTmpImageSrcAsBlob'] == 'true') {
+            echo '<img src="'.$img->getTmpImageSrcAsBlob().'" width="300" hspace="15" border="1"/>';
+        }
 
         echo '<h3>&nbsp;Result&#8680;&nbsp;</h3>
             <img src="'.$img->getFinalImageSrcAsBlob().'" width="300" hspace="15" border="1">';
@@ -82,8 +93,12 @@ if($source){
     <span class="sh_preproc">include</span><span class="sh_symbol">(</span><span class="sh_string">'SmartImageTool.php'</span><span class="sh_symbol">);</span>
     <span class="sh_variable">$img</span> <span class="sh_symbol">=</span> SmartImageTool<span class="sh_symbol">::</span>instance<span class="sh_symbol">(</span> <span id="sourceDisplay" class="sh_string">'path/to/image.jpg'</span> <span class="sh_symbol">)</span>
             <span class="sh_symbol">-></span>setTmpImageWidth<span class="sh_symbol">(</span><select id="tmpImageWidth">
-                    <option>10</option><option>20</option><option>30</option><option selected="selected">40</option><option>50</option><option>75</option><option>100</option><option>150</option><option>200</option>
-                </select><span class="sh_symbol">)</span>
+                    <option>10</option><option>20</option><option>30</option><option selected="selected">40</option><option>50</option><option>75</option><option>100</option>
+                    <option>150</option><option>200</option><option>250</option><option>300</option><option>400</option><option>500</option><option>600</option>
+                </select><span class="sh_symbol">)</span><span class="sh_comment"> // for working tmp copy</span>
+            <span class="sh_symbol">-></span>setFilterContrast<span class="sh_symbol">(</span> - <select id="filterContrast">
+                    <option>0</option><option>50</option><option>100</option><option>150</option><option selected="selected">200</option><option>250</option><option>300</option><option>400</option><option>500</option>
+                </select><span class="sh_symbol">)</span><span class="sh_comment"> // for working tmp copy</span>
             <span class="sh_symbol">-></span>setFinalImageRatio<span class="sh_symbol">(</span><select id="finalImageRatioWidth">
                     <option>1</option><option selected="selected">2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option>
                 </select> / <select id="finalImageRatioHeight">
@@ -95,8 +110,9 @@ if($source){
                     <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option>
                 </select><span class="sh_symbol">)</span><span class="sh_comment">// = ZOOM (working on this one)</span>
             <span class="sh_symbol">-></span>buildFinalImage<span class="sh_symbol">();</span>
+<input type="checkbox" id="getTmpImageSrcAsBlob" /> <span class="sh_keyword">echo</span> <span class="sh_string">'&lt;img src="'</span>.<span class="sh_variable">$img</span><span class="sh_symbol">-></span>getTmpImageSrcAsBlob<span class="sh_symbol">()</span>.<span class="sh_string">'" &gt;'</span>;<span class="sh_comment"> // working tmp copy</span>
 <input type="checkbox" disabled="disabled" checked="checked" /> <span class="sh_keyword">echo</span> <span class="sh_string">'&lt;img src="'</span>.<span class="sh_variable">$img</span><span class="sh_symbol">-></span>getFinalImageSrcAsBlob<span class="sh_symbol">()</span>.<span class="sh_string">'" &gt;'</span>;
-<input type="checkbox" id="getVariationsMatrix" checked="checked" checked="checked" /> <span class="sh_keyword">echo</span> <span class="sh_variable">$img</span><span class="sh_symbol">-></span>getVariationsMatrix<span class="sh_symbol">();</span>
+<input type="checkbox" id="getVariationsMatrix" /> <span class="sh_keyword">echo</span> <span class="sh_variable">$img</span><span class="sh_symbol">-></span>getVariationsMatrix<span class="sh_symbol">();</span>
 <span class="sh_symbol">?&gt;</span>
 </pre><!--input type="checkbox" id="getOriginalImageSrcAsBlob" checked="checked" /> <span class="sh_keyword">echo</span> <span class="sh_string">'&lt;img src="'</span>.<span class="sh_variable">$img</span><span class="sh_symbol">-></span>getOriginalImageSrcAsBlob<span class="sh_symbol">()</span>.<span class="sh_string">'" &gt;'</span>;-->
 
@@ -148,7 +164,9 @@ if($source){
         formData.append('finalImageRatioWidth2', $("#finalImageRatioWidth2").val());
         formData.append('finalImageRatioHeight2', $("#finalImageRatioHeight2").val());
         formData.append('tmpImageWidth', $("#tmpImageWidth").val());
+        formData.append('filterContrast', $("#filterContrast").val());
         formData.append('getOriginalImageSrcAsBlob', $('#getOriginalImageSrcAsBlob').prop('checked'));
+        formData.append('getTmpImageSrcAsBlob', $('#getTmpImageSrcAsBlob').prop('checked'));
         formData.append('getVariationsMatrix', $('#getVariationsMatrix').prop('checked'));
 
         source = (typeof userImage == 'string') ? userImage : userImage.name;
