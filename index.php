@@ -94,7 +94,7 @@ if($source){
     <span class="sh_preproc">include</span><span class="sh_symbol">(</span><span class="sh_string">'SmartImageTool.php'</span><span class="sh_symbol">);</span>
     <span class="sh_variable">$img</span> <span class="sh_symbol">=</span> SmartImageTool<span class="sh_symbol">::</span>instance<span class="sh_symbol">(</span> <span id="sourceDisplay" class="sh_string">'path/to/image.jpg'</span> <span class="sh_symbol">)</span>
             <span class="sh_symbol">-></span>setTmpImageWidth<span class="sh_symbol">(</span><select id="tmpImageWidth">
-                    <option>10</option><option>20</option><option>30</option><option selected="selected">40</option><option>50</option><option>75</option><option>100</option>
+                    <option selected="selected">10</option><option>20</option><option>30</option><option>40</option><option>50</option><option>75</option><option>100</option>
                     <option>150</option><option>200</option><option>250</option><option>300</option><option>400</option><option>500</option><option>600</option>
                 </select><span class="sh_symbol">)</span><span class="sh_comment"> // for working tmp copy</span>
             <span class="sh_symbol">-></span>setFilterContrast<span class="sh_symbol">(</span> - <select id="filterContrast">
@@ -122,7 +122,8 @@ if($source){
         <div>Click an image</div>
         <!--img src="images-test/miranda-kerr.jpg"-->
         <img src="images-test/cat.jpg">
-        <img src="images-test/fox.jpg">
+        <img src="images-test/fox.jpg"><br/>
+        <img src="images-test/miranda-kerr-test-face.jpg">
     </div>
     
     <div id="drop-area">
