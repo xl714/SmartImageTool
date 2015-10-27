@@ -40,7 +40,6 @@ if($source){
         ->setTmpImageWidth($tmpImageWidth)
         ->setFilterContrast($filterContrast)
         ->setFinalImageRatio($finalImageRatio)
-        //->showVariationsHeaviestZoneOnTmpCopy()
         ->buildFinalImage();
 
     if(!empty($_POST['setFinalImageRatio2']) && $_POST['setFinalImageRatio2'] == 'true'){
@@ -56,6 +55,8 @@ if($source){
         }*/
 
         if (!empty($_POST['getTmpImageSrcAsBlob']) && $_POST['getTmpImageSrcAsBlob'] == 'true') {
+
+            $img->showVariationsHeaviestZoneOnTmpCopy();
             echo '<img src="'.$img->getTmpImageSrcAsBlob().'" width="300" hspace="15" border="1"/>';
         }
 
@@ -64,7 +65,7 @@ if($source){
 
         if (!empty($_POST['getVariationsMatrix']) && $_POST['getVariationsMatrix'] == 'true') {
             echo '<div style="clear:both;padding: 15px 0 0 0;">Variations matrix of the uploaded picture used to find the interesting zone:</div>';
-            echo $img->getVariationsMatrix();
+            echo $img->getVariationsMatrixHtml();
         }
 
     }else{

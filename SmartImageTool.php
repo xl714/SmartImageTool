@@ -140,14 +140,14 @@ class SmartImageTool
 
         if($this->heaviestZoneStartX !== false)
         {
-            $height = $this->originalImageHeight;
-            $width = $height * $this->finalImageRatio;
+            $this->finalImageHeight = $this->originalImageHeight;
+            $this->finalImageWidth = $this->finalImageHeight * $this->finalImageRatio;
             $startX = round($this->heaviestZoneStartX * $this->originalImageWidth / $this->tmpImageWidth );
         }
         elseif($this->heaviestZoneStartY !== false)
         {
-            $width = $this->originalImageWidth;
-            $height = $width / $this->finalImageRatio;
+            $this->finalImageWidth = $this->originalImageWidth;
+            $this->finalImageHeight = $this->finalImageWidth / $this->finalImageRatio;
             $startY = round(    $this->heaviestZoneStartY * $this->originalImageHeight / $this->tmpImageHeight     );
         }
         else{
@@ -155,7 +155,7 @@ class SmartImageTool
             return $this;
         }
 
-        $this->finalImage = imagecreatetruecolor($width, $height);
+        $this->finalImage = imagecreatetruecolor($this->finalImageWidth, $this->finalImageHeight);
 
         imagecopy(
             $this->finalImage,     //resource $dst_im - the image object ,
@@ -164,8 +164,8 @@ class SmartImageTool
             0,                     // y coordinate in the destination image (use 0) , 
             $startX,               // x coordinate in the source image you want to crop , 
             $startY,               // y coordinate in the source image you want to crop , 
-            $width,                // crop width ,
-            $height                // crop height 
+            $this->finalImageWidth,                // crop width ,
+            $this->finalImageHeight                // crop height 
         );
 
         return $this;
@@ -232,8 +232,14 @@ class SmartImageTool
         if(!empty($this->errors)){ return $this; }
 
         if(!empty($this->heaviestZoneStartX))
-            imagerectangle($this->tmpImage, $this->heaviestZoneStartX ,0 ,($this->heaviestZoneStartX + $this->finalImageWidth ), ($this->tmpImageHeight - 1), $this->flagColor);
-        
+            imagerectangle(
+                $this->tmpImage, 
+                $this->heaviestZoneStartX,                              // X : coordonnée du coin en haut, à gauche.
+                0,                                                      // Y : coordonnée du coin en haut, à gauche.
+                ($this->heaviestZoneStartX + ($this->tmpImageHeight * $this->finalImageRatio) ), // X : coordonnée du point en bas, à droite.
+                ($this->tmpImageHeight - 1),                            // Y : coordonnée du point en bas, à droite.
+                $this->flagColor
+            );
         return $this;
     }
 
@@ -358,12 +364,12 @@ class SmartImageTool
         return array('x' => $totalX/$totalMass, 'y' => $totalY/$totalMass);
     }
 
-    public function getVariationsMatrix(){
+    public function getVariationsMatrixHtml(){
         $matrix = $this->getTmpImageVariationsMatrix();
-        return self::matrixToString($matrix);
+        return self::matrixToHtml($matrix);
     }
 
-    public static function matrixToString($matrix){
+    public static function matrixToHtml($matrix){
         if(empty($matrix)) return '';
         $str = '<pre style="font-size:9px;line-height:15px;">';
         foreach ($matrix as $y => $row) {
