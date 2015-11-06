@@ -13,19 +13,17 @@ if( is_array( $_FILES ) && isset( $_FILES['userImage'] ) && is_uploaded_file( $_
 {
     $source = $_FILES['userImage'];
 }
-elseif( isset( $_POST['userImage'] ) && file_exists( $_POST['userImage'] ) )
+elseif( isset( $_POST['userImage'] ) && file_exists( 'images-test/'.basename( $_POST['userImage'] ) ) )
 {
-    $source = $_POST['userImage'];
+    $source = 'images-test/'.basename( $_POST['userImage'] );
 }
 
 if( $source )
 {
-
     $finalImageRatio = 1;
     if (!empty($_POST['finalImageRatioWidth']) && !empty($_POST['finalImageRatioHeight'])) {
         $finalImageRatio = $_POST['finalImageRatioWidth'] / $_POST['finalImageRatioHeight'];
     }
-
     $tmpImageWidth = 40;
     if (!empty($_POST['tmpImageWidth'])) {
         $tmpImageWidth = (int) $_POST['tmpImageWidth'];
@@ -35,7 +33,6 @@ if( $source )
     if (!empty($_POST['filterContrast'])) {
         $filterContrast = (int) $_POST['filterContrast'];
     }
-
     $img = SmartImageTool::instance( $source )->setTmpImageWidth($tmpImageWidth)
 										      ->setFilterContrast($filterContrast)
 										      ->setFinalImageRatio($finalImageRatio)
@@ -46,7 +43,6 @@ if( $source )
         $finalImageRatio2 = $_POST['finalImageRatioWidth2'] / $_POST['finalImageRatioHeight2'];
         $img = $img->setFinalImageRatio( $finalImageRatio2 )->buildFinalImage();
     }
-
     if( empty( $img->errors ) )
     {
     	echo '<div class="row">';
@@ -66,8 +62,14 @@ if( $source )
         echo '	<div class="col-xs-12 image-matrix">';
         if (!empty($_POST['getVariationsMatrix']) && $_POST['getVariationsMatrix'] == 'true')
         {
+            echo '<hr/>Matrice des variations de couleurs<br/>';
 	        echo $img->getVariationsMatrixHtml();
 	    }
+        if (!empty($_POST['getContourMatrix']) && $_POST['getContourMatrix'] == 'true')
+        {
+            echo '<hr/>Matrice de contour (travail en cours)<br/>';
+            echo $img->getContourMatrixHtml();
+        }
 	    echo '	</div>';
         echo '</div>';
     }
@@ -75,6 +77,7 @@ if( $source )
     {
         echo 'Errors : <ul class="errors"><li>'.implode('</li><li>', $img->errors).'</li></ul><hr/>';
     }
+    
     exit();
 }
 ?>
@@ -82,6 +85,7 @@ if( $source )
 <title>PHP-GD Smart Image Tool - Crop automatique "intelligent"</title>
 <meta name="description" content="Classe détectant automatiquement la zone la plus intéressante dans une image par exemple pour la cropper. This class automatically find the most interesting zone in a picture in order to crop it.">
 <meta name="author" content="Xavier Langlois aka XL714">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta charset="UTF-8">
 <head>
     <script src="javascript/jquery.min.js"></script>
@@ -97,14 +101,16 @@ if( $source )
     <p>EN: This php class uses PHP-GD to automatically find the most interesting zone in a picture in order to crop it. It uses the color variations between each pixel.</p>
 
     
-    <div class="row">
+    <div class="row container-fluid">
     	<div class="col-xs-6">
 	    	<form id="image-options-form" action="#" method="POST">
-	    		<legend>Options</legend>
+	    		<legend>Configuration</legend>
+
+                <h6>Options de la copie de travail temporaire de l'image</h6>
 				<div class="form-group">
 					<div class="row">
 						<div class="right-label col-xs-6">
-							<label>Largeur de l'image temporaire pour le traitement :</label>
+							<label>Largeur :</label>
 						</div>
 						<div class="col-xs-4">
 							<select id="TmpImageWidth" class="form-control" name="TmpImageWidth">
@@ -133,7 +139,7 @@ if( $source )
 				<div class="form-group">
 					<div class="row">
 						<div class="right-label col-xs-6">
-							<label>Contraste à appliquer sur l'image :</label>
+							<label>Contraste :</label>
 						</div>
 						<div class="col-xs-4">
 							<select id="TmpImageContrast" class="form-control" name="TmpImageContrast">
@@ -141,7 +147,7 @@ if( $source )
 								<option>-50</option>
 								<option>-100</option>
 								<option>-150</option>
-								<option>-200</option>
+								<option selected="selected">-200</option>
 								<option>-250</option>
 								<option>-300</option>
 				                <option>-400</option>
@@ -151,11 +157,13 @@ if( $source )
 						<div class="left-label col-xs-2"></div>
 					</div>
 				</div>
+
+                <h6>Options de l'image finale</h6>
 				
 				<div class="form-group">
 					<div class="row">
 						<div class="right-label col-xs-6">
-							<label>Ratio de l'image après premier traitement :</label>
+							<label>Ratio après premier traitement :</label>
 						</div>
 						<div class="col-xs-4">
 							<div class="form-inline">
@@ -190,11 +198,10 @@ if( $source )
 					</div>
 				</div>
 				
-				
 				<div class="form-group">
 					<div class="row">
 						<div class="right-label col-xs-6">
-							<label>Faire une repasse avec un second ratio:</label>
+							<label>Retraiter l'image avec un 2ème ratio (= ZOOM):</label>
 						</div>
 						<div class="col-xs-6">
 							<div class="checkbox">
@@ -210,7 +217,7 @@ if( $source )
 				<div id="UseSecondImageRatio-options" class="form-group">
 					<div class="row">
 						<div class="right-label col-xs-6">
-							<label>Ratio de l'image après second traitement :</label>
+							<label>Ratio pour 2ème traitement :</label>
 						</div>
 						<div class="col-xs-4">
 							<div class="form-inline">
@@ -245,10 +252,12 @@ if( $source )
 					</div>
 				</div>
 				
+                <h6>Options d'affichage</h6>
+
 				<div class="form-group">
 					<div class="row">
 						<div class="right-label col-xs-6">
-							<label>Affichage de l'image de travail:</label>
+							<label>Afficher de l'image de travail:</label>
 						</div>
 						<div class="col-xs-6">
 							<div class="checkbox">
@@ -259,12 +268,9 @@ if( $source )
 							</div>
 						</div>
 					</div>
-				</div>
-				
-				<div class="form-group">
 					<div class="row">
 						<div class="right-label col-xs-6">
-							<label>Affichage de la matrice de travail:</label>
+							<label>Afficher de la matrice de travail:</label>
 						</div>
 						<div class="col-xs-6">
 							<div class="checkbox">
@@ -275,6 +281,19 @@ if( $source )
 							</div>
 						</div>
 					</div>
+                    <div class="row">
+                        <div class="right-label col-xs-6">
+                            <label>Afficher de la matrice de contour:</label>
+                        </div>
+                        <div class="col-xs-6">
+                            <div class="checkbox">
+                                <label>
+                                    <input id="ShowContourMatrice" type="checkbox" value="1" name="ShowContourMatrice" />
+                                    <strong>Oui</strong> <small>(Travail en cours...)</small>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
 				</div>
 		    </form>
     	</div>
@@ -296,8 +315,11 @@ if( $source )
 					</div>
 					<span class="sh_keyword">echo</span>&nbsp;&nbsp;&nbsp;<span class="sh_string">'&lt;img src="'</span>.<span class="sh_variable">$img</span><span class="sh_symbol">-></span>getFinalImageSrcAsBlob<span class="sh_symbol">()</span>.<span class="sh_string">'" &gt;'</span>;<br/>
 					<div id="ShowWorkingMatrice-container">
-						<span class="sh_keyword">echo</span>&nbsp;&nbsp;&nbsp;<span class="sh_variable">$img</span><span class="sh_symbol">-></span>getVariationsMatrix<span class="sh_symbol">();</span><br/>
+						<span class="sh_keyword">echo</span>&nbsp;&nbsp;&nbsp;<span class="sh_variable">$img</span><span class="sh_symbol">-></span>getVariationsMatrixHtml<span class="sh_symbol">();</span><br/>
 					</div>
+                    <div id="ShowContourMatrice-container">
+                        <span class="sh_keyword">echo</span>&nbsp;&nbsp;&nbsp;<span class="sh_variable">$img</span><span class="sh_symbol">-></span>getContourMatrixHtml<span class="sh_symbol">();</span><br/>
+                    </div>
 				<span class="sh_symbol">?&gt;</span>
 			</div>
     	</div>
@@ -319,17 +341,20 @@ if( $source )
 		    </div>
 	    </div>
 	    <div class="col-xs-6">
-	    	<legend>Ou selectionner la votre</legend>
+	    	<legend>Ou sélectionnez la votre</legend>
 		    <div id="drop-area">
+		    	<input id="fileDragArea" type="file" name="" />
 		        <div class="drop-text">
-		            Or drag & drop an image here<br/>
+		        	<input id="fileDragArea" type="file" name="" />
+		            Click to select or drag & drop an image here<br/>
 		            It will be cropped with the input ratio and (hopefully) at the right place.
 		        </div>
 		    </div>
 	    </div>
 	</div>
     
-    <div id="imagecrop-result" class="row">
+    <div id="imagecrop-result">
 	</div>
+
 </body>
 </html>

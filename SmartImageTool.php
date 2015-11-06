@@ -31,7 +31,8 @@ class SmartImageTool
     public $tmpImageHeight;
     public $tmpImageRatio;
     public $tmpImageSuffix = '_SmartImageToolTmpImage';
-    public $tmpImageMatrix = array();
+
+    public $tmpImageContourMatrix = array();
     public $tmpImageVariationsMatrix = array();
     public $tmpImagevariationsCentroid;
 
@@ -287,7 +288,7 @@ class SmartImageTool
     }
 
     public function resetTmpImage(){
-        $this->tmpImageMatrix = array();
+        $this->tmpImageContourMatrix = array();
         $this->tmpImageVariationsMatrix = array();
     }
 
@@ -302,20 +303,56 @@ class SmartImageTool
             $this->buildTmpImage();
         }
 
+        $this->tmpImageContourMatrix = array();
+
         for ($y=0; $y < $this->tmpImageHeight; $y++) {
 
             $previousRgb = false;
             $reviousColors = array();
 
+            $lastWhiteX = 0;
+
             for ($x=0; $x < $this->tmpImageWidth; $x++) {
+
+                if(!isset($lastWhiteY[$x])){
+                    $lastWhiteY[$x] = 0;
+                }
 
                 $rgb = imagecolorat($this->tmpImage, $x, $y);
                 $colors = imagecolorsforindex($this->tmpImage, $rgb); //d($colors);exit;
-                $this->tmpImageMatrix[$y][$x] = $colors;
+                //$this->tmpImageMatrix[$y][$x] = $colors;
 
-                if($x){
-                    $this->tmpImageVariationsMatrix[$y][$x] = self::getPixelColorsVariation($colors, $previousColors);
+                $pixelColorsVariation = ($x) ? self::getPixelColorsVariation($colors, $previousColors) : 0;
+                
+                if($pixelColorsVariation < 250) $pixelColorsVariation = 0;
+
+                $this->tmpImageVariationsMatrix[$y][$x] = $pixelColorsVariation;
+
+                // build contour matrix
+                if( $pixelColorsVariation == 0 )
+                {
+                    if($this->tmpImageVariationsMatrix[$y][$x-1] != 0)
+                    {
+                        $halfColoredInterval = ($x - 1 - $lastWhiteX ) / 2;
+                        $halfColoredIntervalX = floor( $x - $halfColoredInterval ); 
+                        $this->tmpImageContourMatrix[$y][$halfColoredIntervalX] = 1;
+                    }
+                    $lastWhiteX = $x;
+
+                    if($this->tmpImageVariationsMatrix[$y-1][$x] != 0)
+                    {
+                        $halfColoredInterval = ($y - 1 - $lastWhiteY[$x] ) / 2;
+                        $halfColoredIntervalY = floor( $y - $halfColoredInterval ); 
+                        $this->tmpImageContourMatrix[$halfColoredIntervalY][$x] = 1;
+                    }
+                    $lastWhiteY[$x] = $y;
                 }
+
+                $this->tmpImageContourMatrix[$y][$x] = 0;
+
+                // clean lost dot
+
+
 
                 $previousRgb =$rgb;
                 $previousColors = $colors;
@@ -336,47 +373,54 @@ class SmartImageTool
         return array_sum($variations);
     }
 
-    public function findVariationsCentroid(){
-        if(!empty($this->errors)){ return $this; }
-        $matrix = $this->getTmpImageVariationsMatrix();
-        $this->tmpImageVariationsCentroid = self::getMatrixCentroid($matrix);
-        return $this;
-    }
-
-    public function showVariationsCentroidOnTmpCopy(){
-        if(!empty($this->errors)){ return $this; }
-        imagefilledellipse($this->tmpImage, $this->tmpImageVariationsCentroid['x'], $this->tmpImageVariationsCentroid['y'], 2, 2, $this->flagColor);
-        imagearc($this->tmpImage, $this->tmpImageVariationsCentroid['x'], $this->tmpImageVariationsCentroid['y'], 8, 8, 0, 360, $this->flagColor);
-        return $this;
-    }
-
-    public static function getMatrixCentroid($matrix){
-        $totalMass = 0;
-        $totalX = 0;
-        $totalY = 0;
-        foreach ($matrix as $y => $row) {
-            foreach ($row as $x => $value) {
-                $totalMass += $value;
-                $totalX += $x * $value;
-                $totalY += $y * $value;
-            }
-        }
-        return array('x' => $totalX/$totalMass, 'y' => $totalY/$totalMass);
-    }
-
     public function getVariationsMatrixHtml(){
         $matrix = $this->getTmpImageVariationsMatrix();
-        return self::matrixToHtml($matrix);
+
+        $cellSize = 5;
+        $str = '<pre style="width:'.( count($matrix[0]) * $cellSize + 20).'px;text-align:center;">';
+        foreach ($matrix as $y => $row) {
+            if(empty($row)) break;
+            $str .= '<div style="margin:0;padding:0;">';
+            foreach($row as $x => $value) {
+                $c = 255 - 765 * $value / 255 ;
+                $str .= '<div style="display:inline-block;width:'.$cellSize.'px;height:'.$cellSize.'px;background-color:rgb('.$c.','.$c.','.$c.')"></div>';
+            }
+            $str .= '</div>';
+        }
+        $str .= '</pre>';
+        return $str;
+
+        //return self::matrixToHtml($matrix);
     }
 
-    public static function matrixToHtml($matrix){
+
+    public static function matrixToHtml($matrix, $sprintfSize = 4){
         if(empty($matrix)) return '';
-        $str = '<pre style="font-size:9px;line-height:15px;">';
+        $str = '<pre style="font-size:8px;line-height:10px;overflow:scroll;">';
         foreach ($matrix as $y => $row) {
             if(empty($row)) break;
             $str .= '<div>';
             foreach($row as $x => $value) {
-                $str .= '<span>'.sprintf("%4s", $value).'</span>';
+                $str .= '<span>'.sprintf("%".$sprintfSize."s", $value).'</span>';
+            }
+            $str .= '</div>';
+        }
+        $str .= '</pre>';
+        return $str;
+    }
+
+    public function getContourMatrixHtml(){
+
+        if(empty($this->tmpImageContourMatrix)) return '';
+
+        $cellSize = 5;
+        $str = '<pre style="width:'.( count($this->tmpImageContourMatrix[0]) * $cellSize + 20).'px;text-align:center;">';
+        foreach ($this->tmpImageContourMatrix as $y => $row) {
+            if(empty($row)) break;
+            $str .= '<div style="margin:0;padding:0;">';
+            foreach($row as $x => $value) {
+                $color = ($value > 0) ? 'Black' : 'White' ;
+                $str .= '<div style="display:inline-block;width:'.$cellSize.'px;height:'.$cellSize.'px;background-color:'.$color.'"></div>';
             }
             $str .= '</div>';
         }
@@ -417,5 +461,35 @@ class SmartImageTool
     public function setFilterContrast($filterContrast){
         $this->filterContrast = $filterContrast;
         return $this;
+    }
+
+    // maybe useful later ?
+
+    public function findVariationsCentroid(){
+        if(!empty($this->errors)){ return $this; }
+        $matrix = $this->getTmpImageVariationsMatrix();
+        $this->tmpImageVariationsCentroid = self::getMatrixCentroid($matrix);
+        return $this;
+    }
+
+    public function showVariationsCentroidOnTmpCopy(){
+        if(!empty($this->errors)){ return $this; }
+        imagefilledellipse($this->tmpImage, $this->tmpImageVariationsCentroid['x'], $this->tmpImageVariationsCentroid['y'], 2, 2, $this->flagColor);
+        imagearc($this->tmpImage, $this->tmpImageVariationsCentroid['x'], $this->tmpImageVariationsCentroid['y'], 8, 8, 0, 360, $this->flagColor);
+        return $this;
+    }
+
+    public static function getMatrixCentroid($matrix){
+        $totalMass = 0;
+        $totalX = 0;
+        $totalY = 0;
+        foreach ($matrix as $y => $row) {
+            foreach ($row as $x => $value) {
+                $totalMass += $value;
+                $totalX += $x * $value;
+                $totalY += $y * $value;
+            }
+        }
+        return array('x' => $totalX/$totalMass, 'y' => $totalY/$totalMass);
     }
 }

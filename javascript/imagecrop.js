@@ -16,6 +16,7 @@ $(document).ready(function() {
 		}
 		$('#TmpSecondImageRatioWidth-container').html( $('#TmpSecondImageRatioWidth').val() );
 		$('#TmpSecondImageRatioHeight-container').html( $('#TmpSecondImageRatioHeight').val() );
+		
 		if( $('#ShowWorkingImage').is(':checked') )
 		{
 			$('#ShowWorkingImage-container').show();
@@ -24,6 +25,7 @@ $(document).ready(function() {
 		{
 			$('#ShowWorkingImage-container').hide();
 		}
+
 		if( $('#ShowWorkingMatrice').is(':checked') )
 		{
 			$('#ShowWorkingMatrice-container').show();
@@ -31,6 +33,15 @@ $(document).ready(function() {
 		else
 		{
 			$('#ShowWorkingMatrice-container').hide();
+		}
+
+		if( $('#ShowContourMatrice').is(':checked') )
+		{
+			$('#ShowContourMatrice-container').show();
+		}
+		else
+		{
+			$('#ShowContourMatrice-container').hide();
 		}
 	};
 	
@@ -55,6 +66,7 @@ $(document).ready(function() {
         formData.append('getOriginalImageSrcAsBlob', true );
         formData.append('getTmpImageSrcAsBlob', $('#ShowWorkingImage').is(':checked') );
         formData.append('getVariationsMatrix', $('#ShowWorkingMatrice').is(':checked') );
+        formData.append('getContourMatrix', $('#ShowContourMatrice').is(':checked') );
 
         source = (typeof userImage == 'string') ? userImage : userImage.name;
         $("#sourceDisplay").html("'"+source+"'");
@@ -75,6 +87,11 @@ $(document).ready(function() {
 	$("#images-test img").on('click', function (e){
         e.preventDefault();
         upload( $(this).attr('src') );
+    });
+	$(document.body).on( 'change', '#fileDragArea', function( e ){
+        e.preventDefault();
+        images = this.files;
+	    upload( images[0] );
     });
 	$("#drop-area").on('dragenter', function (e){
         e.preventDefault();
